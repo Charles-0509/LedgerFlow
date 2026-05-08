@@ -1,0 +1,92 @@
+CREATE DATABASE IF NOT EXISTS daily_finance
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_0900_ai_ci;
+
+USE daily_finance;
+
+CREATE TABLE IF NOT EXISTS `user` (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password_hash VARCHAR(100) NOT NULL,
+  nickname VARCHAR(50) NOT NULL,
+  status TINYINT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS user_profile (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  default_monthly_budget DECIMAL(10,2) NOT NULL DEFAULT 3000.00,
+  currency VARCHAR(10) NOT NULL DEFAULT 'CNY',
+  default_account_id BIGINT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_profile_user (user_id),
+  CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES `user` (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS account (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  type VARCHAR(20) NOT NULL DEFAULT 'CASH',
+  balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  is_default TINYINT NOT NULL DEFAULT 0,
+  is_deleted TINYINT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_account_user (user_id, is_deleted),
+  CONSTRAINT fk_account_user FOREIGN KEY (user_id) REFERENCES `user` (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS category (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  type VARCHAR(20) NOT NULL,
+  icon VARCHAR(50) NULL,
+  color VARCHAR(20) NULL,
+  is_system TINYINT NOT NULL DEFAULT 0,
+  is_deleted TINYINT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_category_user_type (user_id, type, is_deleted),
+  CONSTRAINT fk_category_user FOREIGN KEY (user_id) REFERENCES `user` (id),
+  CONSTRAINT ck_category_type CHECK (type IN ('INCOME', 'EXPENSE'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS monthly_budget (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  budget_month CHAR(7) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_budget_user_month (user_id, budget_month),
+  CONSTRAINT fk_budget_user FOREIGN KEY (user_id) REFERENCES `user` (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS transaction_record (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  type VARCHAR(20) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  category_id BIGINT NOT NULL,
+  account_id BIGINT NOT NULL,
+  record_date DATE NOT NULL,
+  note VARCHAR(255) NULL,
+  is_deleted TINYINT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_record_user_date (user_id, record_date, is_deleted),
+  KEY idx_record_user_type (user_id, type, is_deleted),
+  KEY idx_record_category (category_id),
+  KEY idx_record_account (account_id),
+  CONSTRAINT fk_record_user FOREIGN KEY (user_id) REFERENCES `user` (id),
+  CONSTRAINT fk_record_category FOREIGN KEY (category_id) REFERENCES category (id),
+  CONSTRAINT fk_record_account FOREIGN KEY (account_id) REFERENCES account (id),
+  CONSTRAINT ck_record_type CHECK (type IN ('INCOME', 'EXPENSE')),
+  CONSTRAINT ck_record_amount CHECK (amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
