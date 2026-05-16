@@ -18,6 +18,10 @@ frontend/dist/
 .vscode/
 *.iml
 
+# Local tool hook artifacts
+.github/java-upgrade/
+*.github/
+
 # OS
 Thumbs.db
 .DS_Store

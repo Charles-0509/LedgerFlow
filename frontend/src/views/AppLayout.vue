@@ -1,11 +1,14 @@
 <template>
   <el-container class="app-shell">
-    <el-aside width="230px" class="app-aside">
+    <el-aside width="248px" class="app-aside">
       <div class="brand">
         <div class="brand-mark">
           <el-icon><Wallet /></el-icon>
         </div>
-        <span>日常记账</span>
+        <div>
+          <span>LedgerFlow</span>
+          <span class="brand-sub">日常记账理财</span>
+        </div>
       </div>
       <el-menu router :default-active="$route.path">
         <el-menu-item index="/dashboard">
@@ -32,9 +35,12 @@
     </el-aside>
     <el-container>
       <el-header class="app-header">
-        <div class="muted">{{ routeName }}</div>
         <div>
-          <span class="muted" style="margin-right: 14px">{{ user?.nickname || user?.username }}</span>
+          <div class="header-title">{{ routeName }}</div>
+          <div class="muted">清楚记录每一笔流动，让预算更有方向。</div>
+        </div>
+        <div class="header-actions">
+          <span class="muted">{{ user?.nickname || user?.username }}</span>
           <el-button :icon="SwitchButton" @click="logout">退出</el-button>
         </div>
       </el-header>
@@ -63,7 +69,7 @@ const routeName = computed(() => {
     '/statistics': '月度分析',
     '/settings': '个人设置'
   }
-  return names[route.path] || '日常记账理财管理系统'
+  return names[route.path] || 'LedgerFlow'
 })
 
 async function logout() {

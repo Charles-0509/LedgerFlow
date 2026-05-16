@@ -1,6 +1,13 @@
 <template>
   <div>
-    <h1 class="page-title">首页</h1>
+    <div class="page-hero">
+      <div>
+        <p class="page-kicker">今日概览</p>
+        <h1 class="page-title">让每一笔钱都有去向。</h1>
+        <p class="page-desc">快速查看当日收支、本月结余和预算余量，近期账单与分类占比都在同一个视图里。</p>
+      </div>
+      <el-button type="primary" :icon="Refresh" @click="loadHome">刷新数据</el-button>
+    </div>
 
     <div class="toolbar">
       <el-input
@@ -12,7 +19,6 @@
         @keyup.enter="loadSearch"
       />
       <el-button type="primary" :icon="Search" @click="loadSearch">搜索</el-button>
-      <el-button :icon="Refresh" @click="loadHome">刷新</el-button>
     </div>
 
     <div class="stat-grid">
@@ -36,12 +42,13 @@
 
     <div class="two-column">
       <div class="panel">
+        <h2 class="panel-title">近期账单</h2>
         <el-table :data="displayRecords" stripe>
           <el-table-column prop="recordDate" label="日期" width="120" />
           <el-table-column prop="categoryName" label="分类" width="120" />
           <el-table-column prop="accountName" label="账户" width="120" />
           <el-table-column prop="note" label="备注" min-width="160" show-overflow-tooltip />
-          <el-table-column label="金额" width="140" align="right">
+          <el-table-column label="金额" width="150" align="right">
             <template #default="{ row }">
               <span class="amount-cell" :class="row.type === 'INCOME' ? 'income' : 'expense'">
                 {{ row.type === 'INCOME' ? '+' : '-' }} ¥ {{ money(row.amount) }}
@@ -51,14 +58,14 @@
         </el-table>
       </div>
       <div class="panel">
-        <h3 style="margin-top: 0">本月分类</h3>
+        <h2 class="panel-title">本月分类</h2>
         <el-empty v-if="!home.categoryOverview?.length" description="暂无数据" />
-        <div v-for="item in home.categoryOverview" :key="`${item.type}-${item.categoryName}`" style="margin-bottom: 14px">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 6px">
+        <div v-for="item in home.categoryOverview" :key="`${item.type}-${item.categoryName}`" style="margin-bottom: 16px">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
             <span>{{ item.categoryName || '未分类' }}</span>
             <strong :class="item.type === 'INCOME' ? 'income' : 'expense'">¥ {{ money(item.total) }}</strong>
           </div>
-          <el-progress :percentage="progressOf(item.total)" :show-text="false" />
+          <el-progress :percentage="progressOf(item.total)" :show-text="false" color="#9fe870" />
         </div>
       </div>
     </div>

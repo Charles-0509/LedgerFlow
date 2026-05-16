@@ -1,19 +1,26 @@
 <template>
   <div>
-    <h1 class="page-title">收支分类</h1>
+    <div class="page-hero">
+      <div>
+        <p class="page-kicker">分类体系</p>
+        <h1 class="page-title">把账单放进正确的桶。</h1>
+        <p class="page-desc">维护收入和支出分类，查看每个分类下的历史账单，保持统计结果清晰可信。</p>
+      </div>
+      <el-button type="primary" :icon="Plus" @click="openCreate">新增分类</el-button>
+    </div>
+
     <div class="toolbar">
       <el-radio-group v-model="activeType" @change="loadCategories">
         <el-radio-button label="EXPENSE">支出分类</el-radio-button>
         <el-radio-button label="INCOME">收入分类</el-radio-button>
       </el-radio-group>
-      <el-button type="primary" :icon="Plus" @click="openCreate">新增分类</el-button>
     </div>
 
     <div class="panel">
       <el-table :data="categories" stripe>
         <el-table-column label="颜色" width="80">
           <template #default="{ row }">
-            <span :style="{ display: 'inline-block', width: '18px', height: '18px', borderRadius: '4px', background: row.color || '#409eff' }" />
+            <span class="category-dot" :style="{ background: row.color || '#9fe870' }" />
           </template>
         </el-table-column>
         <el-table-column prop="name" label="分类名称" />
@@ -90,7 +97,7 @@ const selected = ref(null)
 const form = reactive(emptyForm())
 
 function emptyForm() {
-  return { id: null, name: '', type: activeType.value, icon: '', color: '#409eff' }
+  return { id: null, name: '', type: activeType.value, icon: '', color: '#9fe870' }
 }
 
 async function loadCategories() {
@@ -103,7 +110,7 @@ function openCreate() {
 }
 
 function openEdit(row) {
-  Object.assign(form, { id: row.id, name: row.name, type: row.type, icon: row.icon, color: row.color || '#409eff' })
+  Object.assign(form, { id: row.id, name: row.name, type: row.type, icon: row.icon, color: row.color || '#9fe870' })
   dialogVisible.value = true
 }
 

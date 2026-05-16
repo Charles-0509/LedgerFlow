@@ -1,7 +1,8 @@
 <template>
   <div class="login-page">
     <div class="login-box">
-      <h1 class="login-title">日常记账理财管理系统</h1>
+      <h1 class="login-title">Ledger Flow</h1>
+      <p class="login-subtitle">把日常收支整理成清晰、可分析的个人财务流。</p>
       <el-tabs v-model="mode" stretch>
         <el-tab-pane label="登录" name="login">
           <el-form :model="loginForm" label-position="top" @keyup.enter="submitLogin">

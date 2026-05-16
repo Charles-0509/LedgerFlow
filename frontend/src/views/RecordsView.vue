@@ -1,6 +1,14 @@
 <template>
   <div>
-    <h1 class="page-title">记账记录</h1>
+    <div class="page-hero">
+      <div>
+        <p class="page-kicker">流水管理</p>
+        <h1 class="page-title">记录收入与支出。</h1>
+        <p class="page-desc">按关键词、日期、分类和类型筛选账单，支持新增、修改、删除和详情查看。</p>
+      </div>
+      <el-button type="primary" :icon="Plus" @click="openCreate">新增账单</el-button>
+    </div>
+
     <div class="toolbar">
       <el-input v-model="filters.keyword" clearable placeholder="关键词" style="width: 200px" />
       <el-select v-model="filters.type" clearable placeholder="类型" style="width: 130px">
@@ -13,7 +21,6 @@
       <el-date-picker v-model="dateRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" />
       <el-button type="primary" :icon="Search" @click="loadRecords">查询</el-button>
       <el-button :icon="Refresh" @click="resetFilters">重置</el-button>
-      <el-button type="success" :icon="Plus" @click="openCreate">新增</el-button>
     </div>
 
     <div class="panel">
@@ -32,7 +39,7 @@
             <span class="amount-cell" :class="row.type === 'INCOME' ? 'income' : 'expense'">¥ {{ money(row.amount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="190" fixed="right">
           <template #default="{ row }">
             <el-button size="small" :icon="View" @click="showDetail(row)">详情</el-button>
             <el-button size="small" :icon="Edit" @click="openEdit(row)" />

@@ -5,6 +5,21 @@ $DbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "localhost" }
 $DbPort = if ($env:DB_PORT) { $env:DB_PORT } else { "3306" }
 $DbName = if ($env:DB_NAME) { $env:DB_NAME } else { "daily_finance" }
 $DbUser = if ($env:DB_USERNAME) { $env:DB_USERNAME } else { "root" }
+$DbPassword = if ($env:DB_PASSWORD) { $env:DB_PASSWORD } else { $null }
+
+function Read-PlainPassword {
+  if ($DbPassword) {
+    return $DbPassword
+  }
+
+  $secure = Read-Host "Enter MySQL password for user $DbUser" -AsSecureString
+  $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+  try {
+    return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+  } finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+  }
+}
 
 function Resolve-MySqlClient {
   if ($env:MYSQL_EXE -and (Test-Path $env:MYSQL_EXE)) {
@@ -47,7 +62,7 @@ function Invoke-MySqlFile {
   )
 
   $databaseArg = if ($Database) { " $Database" } else { "" }
-  $command = "`"$MySqlExe`" -h $DbHost -P $DbPort -u $DbUser -p$databaseArg < `"$SqlFile`""
+  $command = "`"$MySqlExe`" --default-character-set=utf8mb4 -h $DbHost -P $DbPort -u $DbUser$databaseArg < `"$SqlFile`""
   cmd.exe /c $command
   if ($LASTEXITCODE -ne 0) {
     throw "mysql command failed for $SqlFile"
@@ -58,7 +73,12 @@ $MySqlExe = Resolve-MySqlClient
 Write-Host "Using MySQL client: $MySqlExe"
 Write-Host "Initializing database: $DbName"
 
-Invoke-MySqlFile -MySqlExe $MySqlExe -Database "" -SqlFile "$Root\database\schema.sql"
-Invoke-MySqlFile -MySqlExe $MySqlExe -Database $DbName -SqlFile "$Root\database\init-data.sql"
+try {
+  $env:MYSQL_PWD = Read-PlainPassword
+  Invoke-MySqlFile -MySqlExe $MySqlExe -Database "" -SqlFile "$Root\database\schema.sql"
+  Invoke-MySqlFile -MySqlExe $MySqlExe -Database $DbName -SqlFile "$Root\database\init-data.sql"
+} finally {
+  Remove-Item Env:\MYSQL_PWD -ErrorAction SilentlyContinue
+}
 
 Write-Host "Database initialization completed."

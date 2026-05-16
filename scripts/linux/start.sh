@@ -12,6 +12,12 @@ if [ -f "$ROOT_DIR/.env.production" ]; then
   set +a
 fi
 
+if [ -z "${DB_HOST:-}" ] || [ -z "${DB_NAME:-}" ] || [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+  echo "Missing database environment variables. Check $ROOT_DIR/.env.production." >&2
+  echo "Required: DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD." >&2
+  exit 1
+fi
+
 need_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing command: $1" >&2

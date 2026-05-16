@@ -1,9 +1,16 @@
 <template>
   <div>
-    <h1 class="page-title">个人设置</h1>
+    <div class="page-hero">
+      <div>
+        <p class="page-kicker">个人设置</p>
+        <h1 class="page-title">设定你的财务偏好。</h1>
+        <p class="page-desc">维护昵称、默认预算、货币和常用账户，让记账流程更顺手。</p>
+      </div>
+    </div>
+
     <div class="two-column">
       <div class="panel">
-        <h3 style="margin-top: 0">财务信息</h3>
+        <h2 class="panel-title">财务信息</h2>
         <el-form :model="profileForm" label-width="110px">
           <el-form-item label="昵称">
             <el-input v-model="profileForm.nickname" />
@@ -30,14 +37,14 @@
       </div>
 
       <div class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
-          <h3 style="margin: 0">账户</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
+          <h2 class="panel-title" style="margin: 0">账户</h2>
           <el-button type="primary" :icon="Plus" @click="openAccount">新增账户</el-button>
         </div>
         <el-table :data="accounts" stripe>
           <el-table-column prop="name" label="名称" />
           <el-table-column prop="type" label="类型" width="110" />
-          <el-table-column label="余额" width="120" align="right">
+          <el-table-column label="余额" width="130" align="right">
             <template #default="{ row }">¥ {{ money(row.balance) }}</template>
           </el-table-column>
           <el-table-column label="操作" width="120">

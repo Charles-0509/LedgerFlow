@@ -33,13 +33,13 @@ mysql -u root -p daily_finance < database/init-data.sql
 3. Windows 一键启动：
 
 ```bat
-scripts\windows\start-dev.cmd
+scripts\windows\start.cmd
 ```
 
 或：
 
 ```powershell
-.\scripts\windows\start-dev.ps1
+.\scripts\windows\start.ps1
 ```
 
 4. 访问：

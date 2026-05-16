@@ -1,9 +1,16 @@
 <template>
   <div>
-    <h1 class="page-title">月度财务分析</h1>
+    <div class="page-hero">
+      <div>
+        <p class="page-kicker">月度分析</p>
+        <h1 class="page-title">看见本月财务走势。</h1>
+        <p class="page-desc">收入、支出、结余、预算使用率和分类占比集中展示，适合课程答辩演示数据库统计能力。</p>
+      </div>
+      <el-button type="primary" :icon="TrendCharts" @click="loadData">重新分析</el-button>
+    </div>
+
     <div class="toolbar">
       <el-date-picker v-model="month" type="month" value-format="YYYY-MM" placeholder="选择月份" />
-      <el-button type="primary" :icon="TrendCharts" @click="loadData">分析</el-button>
     </div>
 
     <div class="stat-grid">
@@ -29,11 +36,11 @@
 
     <div class="two-column">
       <div class="panel">
-        <h3 style="margin-top: 0">每日收支趋势</h3>
+        <h2 class="panel-title">每日收支趋势</h2>
         <div ref="trendChart" class="chart"></div>
       </div>
       <div class="panel">
-        <h3 style="margin-top: 0">分类占比</h3>
+        <h2 class="panel-title">支出分类占比</h2>
         <div ref="categoryChart" class="chart"></div>
       </div>
     </div>
@@ -51,6 +58,8 @@ const month = ref(currentMonth())
 const data = ref({})
 const trendChart = ref(null)
 const categoryChart = ref(null)
+let trendInstance
+let categoryInstance
 
 async function loadData() {
   data.value = await statisticsApi.monthly({ month: month.value })
@@ -60,25 +69,29 @@ async function loadData() {
 }
 
 function renderTrend() {
-  const chart = echarts.init(trendChart.value)
+  trendInstance?.dispose()
+  trendInstance = echarts.init(trendChart.value)
   const rows = data.value.trendStats || []
-  chart.setOption({
+  trendInstance.setOption({
     tooltip: { trigger: 'axis' },
     legend: { data: ['收入', '支出'] },
     xAxis: { type: 'category', data: rows.map((item) => item.day) },
     yAxis: { type: 'value' },
+    grid: { left: 42, right: 18, top: 42, bottom: 38 },
     series: [
-      { name: '收入', type: 'bar', data: rows.map((item) => item.income), itemStyle: { color: '#147d64' } },
-      { name: '支出', type: 'bar', data: rows.map((item) => item.expense), itemStyle: { color: '#c2410c' } }
+      { name: '收入', type: 'bar', data: rows.map((item) => item.income), itemStyle: { color: '#054d28', borderRadius: [8, 8, 0, 0] } },
+      { name: '支出', type: 'bar', data: rows.map((item) => item.expense), itemStyle: { color: '#d03238', borderRadius: [8, 8, 0, 0] } }
     ]
   })
 }
 
 function renderCategory() {
-  const chart = echarts.init(categoryChart.value)
+  categoryInstance?.dispose()
+  categoryInstance = echarts.init(categoryChart.value)
   const rows = (data.value.categoryStats || []).filter((item) => item.type === 'EXPENSE')
-  chart.setOption({
+  categoryInstance.setOption({
     tooltip: { trigger: 'item' },
+    color: ['#9fe870', '#ffc091', '#e2f6d5', '#ffd11a', '#38c8ff', '#d03238'],
     series: [
       {
         type: 'pie',
