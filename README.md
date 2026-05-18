@@ -54,7 +54,7 @@ scripts\windows\start.cmd
 
 ## Ubuntu 24 运行
 
-`scripts/linux/start.sh` 只负责编译和启动前后端，不执行 `git pull`、不初始化数据库、不修改 nginx、不注册 systemd。
+`scripts/linux/start.sh` 默认只在源码变化时重新编译，并启动后端服务；生产环境推荐由 nginx 直接托管 `frontend/dist`，减少低内存服务器上的常驻 Node 进程。脚本不执行 `git pull`、不初始化数据库、不修改 nginx、不注册 systemd。
 
 ```bash
 cd /opt/daily-finance

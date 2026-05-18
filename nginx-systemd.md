@@ -4,13 +4,13 @@ These commands assume:
 
 - Project path: `/opt/LedgerFlow`
 - Backend: `127.0.0.1:8080`
-- Frontend Vite preview: `127.0.0.1:4173`
+- Frontend static files: `/opt/LedgerFlow/frontend/dist`
 - Domain: `finance.zfye.site`
 - Cloudflare Origin certificate:
   - `/etc/ssl/cloudflare/origin.pem`
   - `/etc/ssl/cloudflare/origin.key`
 
-Install JDK 21, Maven, Node.js, npm, MySQL Server 9.7.0, and nginx before running the app. `scripts/linux/start.sh` only builds and starts the app. It does not install software, run `git pull`, initialize the database, edit nginx, or register systemd.
+Install JDK 21, Maven, Node.js, npm, MySQL Server 9.7.0, and nginx before running the app. `scripts/linux/start.sh` only builds changed files and starts the backend by default. It does not install software, run `git pull`, initialize the database, edit nginx, or register systemd.
 
 ## First database initialization
 
@@ -42,7 +42,11 @@ SERVER_PORT=8080
 SERVER_ADDRESS=127.0.0.1
 SPRING_PROFILES_ACTIVE=prod
 FRONTEND_PORT=4173
+FRONTEND_MODE=static
+FORCE_BUILD=0
 ```
+
+`FRONTEND_MODE=static` is recommended on low-memory servers. nginx serves `frontend/dist` directly, so the server does not need a long-running Vite preview process. Use `FRONTEND_MODE=preview` only when you want to keep the old preview-server behavior.
 
 ## Manual start
 
@@ -65,6 +69,8 @@ server {
 server {
     listen 443 ssl http2;
     server_name finance.zfye.site;
+    root /opt/LedgerFlow/frontend/dist;
+    index index.html;
 
     ssl_certificate     /etc/ssl/cloudflare/origin.pem;
     ssl_certificate_key /etc/ssl/cloudflare/origin.key;
@@ -81,15 +87,7 @@ server {
     }
 
     location / {
-        proxy_pass http://127.0.0.1:4173;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        try_files $uri $uri/ /index.html;
     }
 }
 EOF
@@ -146,3 +144,10 @@ sudo systemctl restart ledgerflow
 ```
 
 Normal updates do not initialize the database and do not overwrite nginx or systemd config.
+
+For a forced rebuild, run:
+
+```bash
+cd /opt/LedgerFlow
+FORCE_BUILD=1 ./scripts/linux/start.sh
+```

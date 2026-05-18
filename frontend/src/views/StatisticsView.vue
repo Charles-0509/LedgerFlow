@@ -48,11 +48,27 @@
 </template>
 
 <script setup>
-import * as echarts from 'echarts'
+import { BarChart, PieChart } from 'echarts/charts'
+import {
+  GridComponent,
+  LegendComponent,
+  TooltipComponent
+} from 'echarts/components'
+import * as echarts from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
 import { nextTick, onMounted, ref } from 'vue'
 import { TrendCharts } from '@element-plus/icons-vue'
 import { statisticsApi } from '../api'
 import { currentMonth, money } from '../utils/format'
+
+echarts.use([
+  BarChart,
+  PieChart,
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+  CanvasRenderer
+])
 
 const month = ref(currentMonth())
 const data = ref({})
